@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  DEBT
+  SAVINGS
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  VISITOR
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedBudgets      Budget[]      @relation("BudgetOwner")
+  budgetMemberships BudgetUser[]
+  transactions      Transaction[]
+}
+
+model Budget {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  currency  String   @default("USD") // Currency code: USD, EUR, HUF
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner        User          @relation("BudgetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members      BudgetUser[]
+  categories   Category[]
+  transactions Transaction[]
+  plans        Plan[]
+}
+
+model BudgetUser {
+  id        String   @id @default(cuid())
+  budgetId  String
+  userId    String
+  role      Role     @default(VISITOR)
+  createdAt DateTime @default(now())
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetId, userId])
+  @@index([budgetId])
+  @@index([userId])
+}
+
+model Category {
+  id        String          @id @default(cuid())
+  budgetId  String
+  name      String
+  emoji     String?         // Optional emoji for visual identification
+  type      TransactionType
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  budget       Budget        @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  plans        Plan[]
+
+  @@index([budgetId])
+  @@index([budgetId, type])
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  budgetId    String
+  userId      String
+  categoryId  String?
+  type        TransactionType
+  amount      Float
+  currency    String          @default("USD") // Original currency of the transaction
+  description String?
+  date        DateTime
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  budget   Budget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([budgetId])
+  @@index([userId])
+  @@index([budgetId, date])
+}
+
+model ExchangeRate {
+  id           String   @id @default(cuid())
+  fromCurrency String   // e.g., "USD"
+  toCurrency   String   // e.g., "EUR"
+  rate         Float
+  date         DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([fromCurrency, toCurrency, date])
+  @@index([fromCurrency, toCurrency])
+  @@index([date])
+}
+
+model Plan {
+  id         String          @id @default(cuid())
+  budgetId   String
+  type       TransactionType
+  categoryId String?
+  year       Int
+  month      Int? // Optional: null = yearly plan, 1-12 = monthly plan
+  amount     Float
+  currency   String          @default("USD") // Original currency of the plan
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  budget   Budget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@unique([budgetId, type, year, month, categoryId])
+  @@index([budgetId])
+  @@index([budgetId, year])
+  @@index([budgetId, year, month])
+  @@index([categoryId])
+}
