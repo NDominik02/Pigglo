@@ -18,7 +18,11 @@ async function getTransactions(budgetId: string) {
     orderBy: { date: 'desc' },
   })
 
-  return transactions
+  // Convert Date to string for client component
+  return transactions.map((t) => ({
+    ...t,
+    date: t.date.toISOString().split('T')[0], // Convert to YYYY-MM-DD format
+  }))
 }
 
 async function getCategories(budgetId: string) {
@@ -30,6 +34,15 @@ async function getCategories(budgetId: string) {
   return categories
 }
 
+async function getBudgetCurrency(budgetId: string) {
+  const budget = await prisma.budget.findUnique({
+    where: { id: budgetId },
+    select: { currency: true },
+  })
+
+  return budget?.currency || 'USD'
+}
+
 export default async function BudgetTransactionsPage({
   params,
 }: {
@@ -39,6 +52,7 @@ export default async function BudgetTransactionsPage({
   const { userId, userRole } = await requireBudgetAccess(budgetId)
   const transactions = await getTransactions(budgetId)
   const categories = await getCategories(budgetId)
+  const currency = await getBudgetCurrency(budgetId)
 
   return (
     <div className="p-8">
@@ -51,6 +65,7 @@ export default async function BudgetTransactionsPage({
         userRole={userRole}
         initialTransactions={transactions}
         categories={categories}
+        currency={currency as 'USD' | 'EUR' | 'HUF'}
       />
     </div>
   )

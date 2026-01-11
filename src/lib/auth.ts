@@ -63,7 +63,6 @@ export const authConfig: NextAuthConfig = {
         session.user.email = token.email as string
         session.user.name = token.name as string | null | undefined
       }
-      
       return session
     },
   },
@@ -74,9 +73,10 @@ export const authConfig: NextAuthConfig = {
 
 const { handlers, auth: baseAuth, signIn, signOut } = NextAuth(authConfig)
 
-// Wrapper to ensure proper session structure
-export async function auth(...args: Parameters<typeof baseAuth>) {
-  return await baseAuth(...args)
+// Wrapper function to handle auth() calls in server components
+// NextAuth v5 requires this wrapper for proper TypeScript types
+export async function auth() {
+  return await baseAuth()
 }
 
 export { handlers, signIn, signOut }

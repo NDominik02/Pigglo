@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TransactionType, Role, canEditTransaction, canDeleteTransaction } from '@/lib/utils'
+import { TransactionType, Role } from '@prisma/client'
+import { canEditTransaction, canDeleteTransaction } from '@/lib/utils'
 import { formatCurrency, getCurrencyOptions, Currency } from '@/lib/currency'
 import { convertAmount } from '@/lib/exchange-rates'
 import Card from './ui/Card'
@@ -63,7 +64,14 @@ export default function TransactionsPage({
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [filterType, setFilterType] = useState<string>('all')
   const [convertedAmounts, setConvertedAmounts] = useState<Map<string, number>>(new Map())
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    type: TransactionType
+    categoryId: string
+    amount: string
+    currency: 'USD' | 'EUR' | 'HUF'
+    description: string
+    date: string
+  }>({
     type: TransactionType.EXPENSE,
     categoryId: '',
     amount: '',
@@ -142,6 +150,7 @@ export default function TransactionsPage({
       type: TransactionType.EXPENSE,
       categoryId: '',
       amount: '',
+      currency: currency as 'USD' | 'EUR' | 'HUF',
       description: '',
       date: new Date().toISOString().split('T')[0],
     })

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TransactionType, Role } from '@/lib/utils'
+import { TransactionType, Role } from '@prisma/client'
 import { canEditPlans } from '@/lib/utils'
 import { formatCurrency, Currency } from '@/lib/currency'
 import Card from './ui/Card'
@@ -73,10 +73,15 @@ export default function PlannerPage({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null)
   const [preselectedType, setPreselectedType] = useState<TransactionType | null>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    type: TransactionType
+    categoryId: string
+    month: number | null
+    amount: string
+  }>({
     type: TransactionType.INCOME,
     categoryId: '',
-    month: null as number | null,
+    month: null,
     amount: '',
   })
   const [applyToAllMonths, setApplyToAllMonths] = useState(false)

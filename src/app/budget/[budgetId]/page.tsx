@@ -1,7 +1,7 @@
 import { requireBudgetAccess } from '@/lib/budget-utils'
 import { prisma } from '@/lib/db'
 import PlannerPage from '@/components/PlannerPage'
-import { TransactionType } from '@/lib/utils'
+import { TransactionType } from '@prisma/client'
 
 async function getPlans(budgetId: string, year: number) {
   const plans = await prisma.plan.findMany({

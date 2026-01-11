@@ -1,21 +1,9 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { Role } from '@prisma/client'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
-}
-
-export enum Role {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  VISITOR = 'VISITOR',
-}
-
-export enum TransactionType {
-  INCOME = 'INCOME',
-  EXPENSE = 'EXPENSE',
-  DEBT = 'DEBT',
-  SAVINGS = 'SAVINGS',
 }
 
 export function canEditTransaction(userRole: Role, transactionUserId: string, currentUserId: string): boolean {

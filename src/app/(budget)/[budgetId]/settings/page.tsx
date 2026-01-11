@@ -32,6 +32,7 @@ async function getBudget(budgetId: string) {
       id: true,
       name: true,
       ownerId: true,
+      currency: true,
     },
   })
 
@@ -66,6 +67,7 @@ export default async function BudgetSettingsPage({
       <SettingsPage
         budgetId={budgetId}
         budgetName={budget.name}
+        budgetCurrency={budget.currency}
         members={members}
       />
     </div>

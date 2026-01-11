@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { TransactionType, Role, canEditCategories } from '@/lib/utils'
+import { TransactionType, Role } from '@prisma/client'
+import { canEditCategories } from '@/lib/utils'
 import { useTheme } from '@/contexts/ThemeContext'
 import Card from './ui/Card'
 import Button from './ui/Button'
@@ -39,7 +40,11 @@ export default function CategoriesPage({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [filterType, setFilterType] = useState<string>('all')
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string
+    emoji: string
+    type: TransactionType
+  }>({
     name: '',
     emoji: '',
     type: TransactionType.EXPENSE,
@@ -290,7 +295,7 @@ export default function CategoriesPage({
                 >
                   <EmojiPicker
                     onEmojiClick={onEmojiClick}
-                    theme={theme === 'dark' ? 'dark' : 'light'}
+                    theme={(theme === 'dark' ? 'dark' : 'light') as any}
                     width={350}
                     height={400}
                   />

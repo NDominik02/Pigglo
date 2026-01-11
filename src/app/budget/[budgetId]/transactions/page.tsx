@@ -18,7 +18,11 @@ async function getTransactions(budgetId: string) {
     orderBy: { date: 'desc' },
   })
 
-  return transactions
+  // Convert Date to string for client component
+  return transactions.map((t) => ({
+    ...t,
+    date: t.date.toISOString().split('T')[0], // Convert to YYYY-MM-DD format
+  }))
 }
 
 async function getCategories(budgetId: string) {
